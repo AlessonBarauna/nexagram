@@ -13,11 +13,13 @@ public class UsersController : ControllerBase
 {
     private readonly IUserService _users;
     private readonly IPostService _posts;
+    private readonly IStoryService _stories;
 
-    public UsersController(IUserService users, IPostService posts)
+    public UsersController(IUserService users, IPostService posts, IStoryService stories)
     {
         _users = users;
         _posts = posts;
+        _stories = stories;
     }
 
     [HttpGet("{username}")]
@@ -67,6 +69,14 @@ public class UsersController : ControllerBase
     {
         var requestingUserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub) is { } s ? Guid.Parse(s) : (Guid?)null;
         var result = await _posts.GetUserPostsAsync(username, requestingUserId, page, pageSize, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{username}/stories")]
+    public async Task<ActionResult<IReadOnlyList<StoryDto>>> GetStories(string username, CancellationToken ct)
+    {
+        var requestingUserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub) is { } s ? Guid.Parse(s) : (Guid?)null;
+        var result = await _stories.GetUserStoriesAsync(username, requestingUserId, ct);
         return Ok(result);
     }
 
