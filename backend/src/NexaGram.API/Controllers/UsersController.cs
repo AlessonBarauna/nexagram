@@ -12,8 +12,13 @@ namespace NexaGram.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _users;
+    private readonly IPostService _posts;
 
-    public UsersController(IUserService users) => _users = users;
+    public UsersController(IUserService users, IPostService posts)
+    {
+        _users = users;
+        _posts = posts;
+    }
 
     [HttpGet("{username}")]
     public async Task<ActionResult<UserProfileDto>> GetProfile(string username, CancellationToken ct)
@@ -50,6 +55,18 @@ public class UsersController : ControllerBase
         CancellationToken ct = default)
     {
         var result = await _users.GetFollowingAsync(username, page, pageSize, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{username}/posts")]
+    public async Task<ActionResult<PagedResult<PostDto>>> GetPosts(
+        string username,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        CancellationToken ct = default)
+    {
+        var requestingUserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub) is { } s ? Guid.Parse(s) : (Guid?)null;
+        var result = await _posts.GetUserPostsAsync(username, requestingUserId, page, pageSize, ct);
         return Ok(result);
     }
 
