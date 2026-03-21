@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NexaGram.API/NexaGram.API.csproj" />
+    <Project Path="src/NexaGram.Application/NexaGram.Application.csproj" />
+    <Project Path="src/NexaGram.Domain/NexaGram.Domain.csproj" />
+    <Project Path="src/NexaGram.Infrastructure/NexaGram.Infrastructure.csproj" />
+    <Project Path="src/NexaGram.Shared/NexaGram.Shared.csproj" />
+  </Folder>
+</Solution>

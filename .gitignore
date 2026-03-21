@@ -1,0 +1,32 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+logs/
+
+# Environment
+.env
+*.env.local
+
+# Angular
+node_modules/
+dist/
+.angular/
+
+# DB
+*.db
+*.db-shm
+*.db-wal
+
+# MinIO / storage
+.minio.sys/
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# Claude Code
+.claude/

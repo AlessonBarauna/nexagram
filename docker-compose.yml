@@ -1,0 +1,135 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: nexagram
+      POSTGRES_USER: nexagram
+      POSTGRES_PASSWORD: nexagram_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexagram"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: nexagram
+      MINIO_ROOT_PASSWORD: nexagram_dev
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        mc alias set local http://minio:9000 nexagram nexagram_dev &&
+        mc mb --ignore-existing local/nexagram-media &&
+        mc anonymous set public local/nexagram-media
+      "
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ollama-init:
+    image: curlimages/curl:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\":\"llava\"}' &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\":\"llama3.1\"}' &&
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\":\"nomic-embed-text\"}'
+      "
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=nexagram;Username=nexagram;Password=nexagram_dev"
+      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__Hangfire: "Host=postgres;Database=nexagram;Username=nexagram;Password=nexagram_dev"
+      Jwt__Secret: ${JWT_SECRET:-super_secret_jwt_key_change_in_production_32chars}
+      Jwt__RefreshSecret: ${JWT_REFRESH_SECRET:-super_secret_refresh_key_change_in_production}
+      Jwt__Issuer: NexaGram
+      Jwt__Audience: NexaGram
+      Ai__Provider: "ollama"
+      Ai__Ollama__BaseUrl: "http://ollama:11434"
+      Ai__Ollama__VisionModel: "llava"
+      Ai__Ollama__TextModel: "llama3.1"
+      Ai__Ollama__EmbeddingModel: "nomic-embed-text"
+      Ai__Claude__ApiKey: ${ANTHROPIC_API_KEY:-}
+      Storage__Provider: "minio"
+      Storage__Endpoint: "http://minio:9000"
+      Storage__AccessKey: "nexagram"
+      Storage__SecretKey: "nexagram_dev"
+      Storage__BucketName: "nexagram-media"
+      Storage__UsePathStyle: "true"
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    environment:
+      API_URL: http://api:5000
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  ollama_data:
