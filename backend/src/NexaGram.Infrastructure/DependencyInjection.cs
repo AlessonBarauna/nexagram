@@ -11,6 +11,7 @@ using System.Text;
 using NexaGram.Infrastructure.Persistence;
 using NexaGram.Infrastructure.Services.Ai;
 using NexaGram.Infrastructure.Services.Auth;
+using NexaGram.Infrastructure.Services.Engagement;
 using NexaGram.Infrastructure.Services.Feed;
 using NexaGram.Infrastructure.Services.Posts;
 using NexaGram.Infrastructure.Services.Storage;
@@ -47,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<IFeedService, FeedService>();
+        services.AddScoped<IEngagementService, EngagementService>();
         services.AddSingleton<MinioStorageService>();
         services.AddSingleton<IStorageService>(sp => sp.GetRequiredService<MinioStorageService>());
 

@@ -12,8 +12,13 @@ namespace NexaGram.API.Controllers;
 public class PostsController : ControllerBase
 {
     private readonly IPostService _posts;
+    private readonly IEngagementService _engagement;
 
-    public PostsController(IPostService posts) => _posts = posts;
+    public PostsController(IPostService posts, IEngagementService engagement)
+    {
+        _posts = posts;
+        _engagement = engagement;
+    }
 
     [Authorize]
     [HttpPost]
@@ -46,6 +51,64 @@ public class PostsController : ControllerBase
     {
         await _posts.DeleteAsync(id, GetUserId(), ct);
         return NoContent();
+    }
+
+    // ── Likes ──────────────────────────────────────────────────────────────
+
+    [Authorize]
+    [HttpPost("{id:guid}/like")]
+    public async Task<IActionResult> Like(Guid id, CancellationToken ct)
+    {
+        await _engagement.LikePostAsync(id, GetUserId(), ct);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}/like")]
+    public async Task<IActionResult> Unlike(Guid id, CancellationToken ct)
+    {
+        await _engagement.UnlikePostAsync(id, GetUserId(), ct);
+        return NoContent();
+    }
+
+    // ── Saves ──────────────────────────────────────────────────────────────
+
+    [Authorize]
+    [HttpPost("{id:guid}/save")]
+    public async Task<IActionResult> Save(Guid id, CancellationToken ct)
+    {
+        await _engagement.SavePostAsync(id, GetUserId(), ct);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}/save")]
+    public async Task<IActionResult> Unsave(Guid id, CancellationToken ct)
+    {
+        await _engagement.UnsavePostAsync(id, GetUserId(), ct);
+        return NoContent();
+    }
+
+    // ── Comments ───────────────────────────────────────────────────────────
+
+    [HttpGet("{id:guid}/comments")]
+    public async Task<ActionResult<PagedResult<CommentDto>>> GetComments(
+        Guid id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        var result = await _engagement.GetCommentsAsync(id, page, pageSize, ct);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("{id:guid}/comments")]
+    public async Task<ActionResult<CommentDto>> CreateComment(
+        Guid id, CreateCommentRequest request, CancellationToken ct)
+    {
+        var comment = await _engagement.CreateCommentAsync(id, GetUserId(), request, ct);
+        return Ok(comment);
     }
 
     private Guid GetUserId() =>
