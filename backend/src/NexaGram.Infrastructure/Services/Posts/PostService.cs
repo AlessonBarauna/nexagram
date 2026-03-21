@@ -11,14 +11,16 @@ public class PostService : IPostService
 {
     private readonly AppDbContext _db;
     private readonly IStorageService _storage;
+    private readonly ISearchService _search;
 
     private static readonly JsonSerializerOptions JsonOpts =
         new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    public PostService(AppDbContext db, IStorageService storage)
+    public PostService(AppDbContext db, IStorageService storage, ISearchService search)
     {
         _db = db;
         _storage = storage;
+        _search = search;
     }
 
     public async Task<PostDto> CreateAsync(Guid userId, CreatePostRequest request, CancellationToken ct = default)
@@ -51,6 +53,10 @@ public class PostService : IPostService
         await _db.SaveChangesAsync(ct);
 
         await _db.Entry(post).Reference(p => p.User).LoadAsync(ct);
+
+        if (post.Status == PostStatus.Published)
+            await _search.SyncPostHashtagsAsync(post.Id, post.Caption, ct);
+
         return ToDto(post);
     }
 
@@ -88,6 +94,10 @@ public class PostService : IPostService
         post.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(ct);
+
+        if (post.Status == PostStatus.Published)
+            await _search.SyncPostHashtagsAsync(post.Id, post.Caption, ct);
+
         return ToDto(post);
     }
 
