@@ -26,6 +26,7 @@ try
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
     builder.Services.AddScoped<IRealtimeNotifier, SignalRNotifier>();
+    builder.Services.AddScoped<IChatNotifier, SignalRChatNotifier>();
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
