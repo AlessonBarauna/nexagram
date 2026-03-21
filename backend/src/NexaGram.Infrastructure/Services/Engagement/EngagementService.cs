@@ -9,8 +9,13 @@ namespace NexaGram.Infrastructure.Services.Engagement;
 public class EngagementService : IEngagementService
 {
     private readonly AppDbContext _db;
+    private readonly INotificationService _notifications;
 
-    public EngagementService(AppDbContext db) => _db = db;
+    public EngagementService(AppDbContext db, INotificationService notifications)
+    {
+        _db = db;
+        _notifications = notifications;
+    }
 
     // ── Likes ──────────────────────────────────────────────────────────────
 
@@ -24,6 +29,10 @@ public class EngagementService : IEngagementService
             .Where(p => p.Id == postId)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.LikeCount, p => p.LikeCount + 1), ct);
         await _db.SaveChangesAsync(ct);
+
+        var post = await _db.Posts.AsNoTracking().SingleOrDefaultAsync(p => p.Id == postId, ct);
+        if (post is not null)
+            await _notifications.PushAsync(post.UserId, userId, NotificationType.Like, postId, "post", ct);
     }
 
     public async Task UnlikePostAsync(Guid postId, Guid userId, CancellationToken ct = default)
@@ -114,6 +123,11 @@ public class EngagementService : IEngagementService
         await _db.SaveChangesAsync(ct);
 
         await _db.Entry(comment).Reference(c => c.User).LoadAsync(ct);
+
+        var post = await _db.Posts.AsNoTracking().SingleOrDefaultAsync(p => p.Id == postId, ct);
+        if (post is not null)
+            await _notifications.PushAsync(post.UserId, userId, NotificationType.Comment, postId, "post", ct);
+
         return ToDto(comment);
     }
 

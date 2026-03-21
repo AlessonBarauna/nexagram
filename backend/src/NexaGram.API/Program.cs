@@ -1,8 +1,10 @@
 using Serilog;
 using NexaGram.Infrastructure;
 using NexaGram.Application;
+using NexaGram.Application.Interfaces;
 using NexaGram.API.Middleware;
 using NexaGram.API.Extensions;
+using NexaGram.API.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -23,6 +25,7 @@ try
 
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddScoped<IRealtimeNotifier, SignalRNotifier>();
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();

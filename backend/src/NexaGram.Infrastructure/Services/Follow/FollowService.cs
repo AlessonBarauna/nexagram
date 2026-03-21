@@ -9,8 +9,13 @@ namespace NexaGram.Infrastructure.Services.Social;
 public class FollowService : IFollowService
 {
     private readonly AppDbContext _db;
+    private readonly INotificationService _notifications;
 
-    public FollowService(AppDbContext db) => _db = db;
+    public FollowService(AppDbContext db, INotificationService notifications)
+    {
+        _db = db;
+        _notifications = notifications;
+    }
 
     public async Task FollowAsync(Guid followerId, Guid followingId, CancellationToken ct = default)
     {
@@ -28,6 +33,7 @@ public class FollowService : IFollowService
             .ExecuteUpdateAsync(s => s.SetProperty(u => u.FollowerCount, u => u.FollowerCount + 1), ct);
 
         await _db.SaveChangesAsync(ct);
+        await _notifications.PushAsync(followingId, followerId, NotificationType.Follow, ct: ct);
     }
 
     public async Task UnfollowAsync(Guid followerId, Guid followingId, CancellationToken ct = default)
