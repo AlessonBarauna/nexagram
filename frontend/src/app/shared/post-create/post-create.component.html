@@ -1,0 +1,114 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visible.set($event); !$event && reset()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  styleClass="post-create-dialog"
+  [showHeader]="false"
+>
+  <div class="create-container">
+    <!-- Header -->
+    <div class="create-header">
+      @if (step() === 'caption' && !loading()) {
+        <button class="back-btn" (click)="step.set('upload')">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+      } @else {
+        <span></span>
+      }
+      <span class="create-title">Novo Post</span>
+      <button class="close-btn" [disabled]="loading()" (click)="close()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Step 1: Upload -->
+    @if (step() === 'upload') {
+      <div
+        class="drop-zone"
+        [class.drag-active]="dragOver()"
+        (click)="fileInput.click()"
+        (drop)="onDrop($event)"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+      >
+        <div class="drop-icon">
+          <i class="pi pi-image"></i>
+        </div>
+        <p class="drop-title">Arraste fotos e vídeos aqui</p>
+        <p class="drop-sub">JPG, PNG, WEBP, GIF, MP4</p>
+        <button class="select-btn" type="button" (click)="$event.stopPropagation(); fileInput.click()">
+          Escolher arquivos
+        </button>
+        <input
+          #fileInput
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp,image/gif,video/mp4"
+          (change)="onFileSelect($event)"
+          style="display:none"
+        />
+      </div>
+    }
+
+    <!-- Step 2: Caption -->
+    @if (step() === 'caption') {
+      <div class="caption-step">
+        <!-- Preview -->
+        <div class="preview-strip">
+          @for (p of previews(); track $index) {
+            <div class="preview-item">
+              @if (p.type === 'image') {
+                <img [src]="p.url" class="preview-thumb" />
+              } @else {
+                <video [src]="p.url" class="preview-thumb" muted></video>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Caption -->
+        <textarea
+          pInputTextarea
+          [(ngModel)]="caption"
+          placeholder="Escreva uma legenda..."
+          rows="3"
+          class="w-full"
+        ></textarea>
+
+        <!-- Visibility -->
+        <div class="visibility-section">
+          <span class="vis-label">Visibilidade</span>
+          <div class="vis-options">
+            @for (opt of visibilityOptions; track opt.value) {
+              <button
+                class="vis-btn"
+                [class.active]="visibility === opt.value"
+                type="button"
+                (click)="visibility = opt.value"
+              >{{ opt.label }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Progress -->
+        @if (loading()) {
+          <div class="upload-progress">
+            <i class="pi pi-spin pi-spinner"></i>
+            {{ uploadProgress() }}
+          </div>
+        }
+
+        <!-- Submit -->
+        <p-button
+          label="Publicar"
+          [loading]="loading()"
+          [disabled]="loading()"
+          (onClick)="submit()"
+          styleClass="w-full"
+        />
+      </div>
+    }
+  </div>
+</p-dialog>

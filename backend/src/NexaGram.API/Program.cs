@@ -76,6 +76,7 @@ try
     app.UseMiddleware<GlobalExceptionMiddleware>();
     app.UseSerilogRequestLogging();
     app.UseCors("AllowFrontend");
+    app.UseStaticFiles();
     app.UseAuthentication();
     app.UseAuthorization();
 

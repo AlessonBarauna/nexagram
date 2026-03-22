@@ -6,6 +6,13 @@ public static class StorageExtensions
 {
     public static async Task EnsureStorageReadyAsync(this WebApplication app)
     {
+        var provider = app.Configuration["Storage:Provider"] ?? "minio";
+        if (provider.Equals("local", StringComparison.OrdinalIgnoreCase))
+        {
+            app.Logger.LogInformation("Storage: using local file system.");
+            return;
+        }
+
         using var scope = app.Services.CreateScope();
         var storage = scope.ServiceProvider.GetRequiredService<MinioStorageService>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<MinioStorageService>>();

@@ -1,0 +1,75 @@
+<div class="feed-layout">
+  <div class="feed-center">
+
+    <!-- New post toast -->
+    @if (hasNewPost()) {
+      <div class="new-post-banner">
+        <i class="pi pi-check-circle"></i>
+        Post publicado com sucesso!
+      </div>
+    }
+
+    <app-stories-bar [stories]="stories()" />
+
+    <div class="posts-list">
+      @for (post of posts(); track post.id) {
+        <app-post-card [post]="post" (deleted)="onPostDeleted($event)" />
+      }
+
+      @if (loading()) {
+        @for (i of [1,2,3]; track i) {
+          <div class="post-skeleton">
+            <div class="skeleton-header">
+              <p-skeleton shape="circle" size="2.5rem" />
+              <div style="flex:1">
+                <p-skeleton width="8rem" height="0.875rem" />
+                <p-skeleton width="5rem" height="0.75rem" styleClass="mt-1" />
+              </div>
+            </div>
+            <p-skeleton width="100%" height="280px" borderRadius="0" styleClass="mt-2" />
+            <p-skeleton width="60%" height="0.875rem" styleClass="mt-2" />
+          </div>
+        }
+      }
+
+      @if (!loading() && hasMore()) {
+        <div class="load-more">
+          <p-button label="Carregar mais" [outlined]="true" (onClick)="loadMore()" />
+        </div>
+      }
+
+      @if (!loading() && posts().length === 0) {
+        <div class="empty-feed">
+          <div class="empty-icon"><i class="pi pi-users"></i></div>
+          <p class="empty-title">Seu feed está vazio</p>
+          <p class="empty-sub">Siga pessoas para ver os posts delas aqui.</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Aside -->
+  <aside class="feed-aside">
+    @if (suggestions().length > 0) {
+      <div class="suggestions-card">
+        <h3 class="suggestions-title">Sugestões para você</h3>
+        @for (user of suggestions(); track user.id) {
+          <div class="suggestion-item">
+            <a [routerLink]="['/profile', user.username]" class="suggestion-user">
+              <p-avatar
+                [image]="user.avatarUrl || undefined"
+                [label]="!user.avatarUrl ? user.username[0].toUpperCase() : undefined"
+                shape="circle"
+              />
+              <div class="suggestion-info">
+                <span class="suggestion-name">{{ user.displayName || user.username }}</span>
+                <span class="suggestion-username">&#64;{{ user.username }}</span>
+              </div>
+            </a>
+            <a [routerLink]="['/profile', user.username]" class="suggestion-follow">Seguir</a>
+          </div>
+        }
+      </div>
+    }
+  </aside>
+</div>

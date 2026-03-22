@@ -1,0 +1,172 @@
+.stories-bar {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 1.25rem 1rem;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.story-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover .story-ring { transform: scale(1.08); }
+}
+
+// Static ring by default
+.story-ring {
+  padding: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+
+// Gradient ring for unseen stories
+.story-avatar.unseen .story-ring {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  animation: ring-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(147,51,234,0); }
+  50%       { box-shadow: 0 0 0 4px rgba(147,51,234,0.2); }
+}
+
+// Inner white gap
+.story-ring::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  z-index: 0;
+}
+
+:host ::ng-deep .story-ring p-avatar {
+  position: relative;
+  z-index: 1;
+}
+
+.story-username {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.no-stories {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  align-self: center;
+  margin: 0;
+}
+
+// ── Story viewer ─────────────────────────────────────────────────────────────
+:host ::ng-deep .story-dialog {
+  .p-dialog {
+    background: #000 !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.8), 0 0 40px rgba(147,51,234,0.15) !important;
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+  }
+  .p-dialog-content {
+    padding: 0 !important;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
+
+.story-viewer {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.story-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.2);
+  z-index: 3;
+
+  .progress-fill {
+    height: 100%;
+    background: #fff;
+    animation: story-progress 5s linear forwards;
+  }
+}
+
+@keyframes story-progress {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+.story-user-header {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.story-viewer-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+}
+
+.story-close {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover { background: rgba(147,51,234,0.6); }
+}
+
+.story-media {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+}
+
+.story-tap-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

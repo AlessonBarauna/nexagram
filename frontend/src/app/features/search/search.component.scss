@@ -1,0 +1,124 @@
+.search-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+  background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.search-bar {
+  margin-bottom: 1.75rem;
+
+  .p-input-icon-left {
+    width: 100%;
+    i { color: var(--text-faint); z-index: 1; }
+  }
+}
+
+.search-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-faint);
+  font-size: 1.5rem;
+}
+
+.result-section { margin-bottom: 2rem; }
+
+.section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem;
+}
+
+.user-result {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-bottom: 0.125rem;
+
+  &:hover {
+    background: rgba(147,51,234,0.06);
+    border-radius: 12px;
+    transform: translateX(3px);
+  }
+}
+
+.user-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.user-result-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.user-result-username {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.hashtag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  flex-direction: column;
+  background: rgba(147,51,234,0.08);
+  border: 1px solid rgba(147,51,234,0.2);
+  border-radius: 10px;
+  padding: 0.5rem 0.875rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background-clip: unset;
+  color: #a855f7;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(147,51,234,0.15);
+    border-color: rgba(147,51,234,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(147,51,234,0.15);
+  }
+}
+
+.tag-count {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  font-weight: 400;
+  margin-top: 0.1rem;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-faint);
+  p { margin: 0; font-size: 0.9rem; }
+}

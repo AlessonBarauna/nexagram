@@ -1,0 +1,81 @@
+<div class="messages-layout">
+  <!-- Conversation list -->
+  <aside class="conv-list">
+    <h3 class="conv-title">Mensagens</h3>
+
+    @if (loadingConvs()) {
+      @for (i of [1,2,3]; track i) {
+        <div class="conv-skeleton">
+          <p-skeleton shape="circle" size="2.5rem" />
+          <p-skeleton width="60%" height="1rem" />
+        </div>
+      }
+    } @else if (conversations().length === 0) {
+      <p class="no-convs">Nenhuma conversa ainda</p>
+    } @else {
+      @for (conv of conversations(); track conv.participant.id) {
+        <div
+          class="conv-item"
+          [class.active]="activeConversation()?.participant?.id === conv.participant.id"
+          (click)="openConversation(conv)"
+        >
+          <p-avatar
+            [image]="conv.participant.avatarUrl || undefined"
+            [label]="!conv.participant.avatarUrl ? conv.participant.username[0].toUpperCase() : undefined"
+            shape="circle"
+          />
+          <div class="conv-info">
+            <span class="conv-name">{{ conv.participant.displayName || conv.participant.username }}</span>
+            <span class="conv-preview">{{ conv.lastMessage.content || '...' }}</span>
+          </div>
+          @if (conv.unreadCount > 0) {
+            <span class="unread-badge">{{ conv.unreadCount }}</span>
+          }
+        </div>
+      }
+    }
+  </aside>
+
+  <!-- Message area -->
+  <div class="msg-area">
+    @if (!activeConversation()) {
+      <div class="no-conv-selected">
+        <i class="pi pi-send" style="font-size:3rem; color:var(--text-color-secondary)"></i>
+        <p>Selecione uma conversa</p>
+      </div>
+    } @else {
+      <div class="msg-header">
+        <p-avatar
+          [image]="activeConversation()!.participant.avatarUrl || undefined"
+          [label]="!activeConversation()!.participant.avatarUrl ? activeConversation()!.participant.username[0].toUpperCase() : undefined"
+          shape="circle"
+          size="normal"
+        />
+        <span class="msg-header-name">{{ activeConversation()!.participant.displayName || activeConversation()!.participant.username }}</span>
+      </div>
+
+      <div class="msg-list">
+        @if (loadingMsgs()) {
+          <div class="msgs-loading"><i class="pi pi-spin pi-spinner"></i></div>
+        }
+        @for (msg of messages(); track msg.id) {
+          <div class="msg-bubble" [class.mine]="isMe(msg)" [class.theirs]="!isMe(msg)">
+            <span class="bubble-text">{{ msg.content }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="msg-input">
+        <input
+          pInputText
+          type="text"
+          placeholder="Mensagem..."
+          [(ngModel)]="messageText"
+          (keyup.enter)="sendMessage()"
+          class="flex-1"
+        />
+        <p-button icon="pi pi-send" (onClick)="sendMessage()" [disabled]="!messageText.trim()" />
+      </div>
+    }
+  </div>
+</div>

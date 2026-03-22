@@ -1,0 +1,42 @@
+<div class="notif-page">
+  <div class="page-header">
+    <h2>Notificações</h2>
+    @if (notifications().length > 0) {
+      <button class="mark-all-btn" (click)="markAllRead()">Marcar todas como lidas</button>
+    }
+  </div>
+
+  @if (loading()) {
+    @for (i of [1,2,3,4,5]; track i) {
+      <div class="notif-skeleton">
+        <p-skeleton shape="circle" size="2.5rem" />
+        <p-skeleton width="70%" height="1rem" />
+      </div>
+    }
+  } @else if (notifications().length === 0) {
+    <div class="empty">
+      <i class="pi pi-bell" style="font-size:3rem; color:var(--text-color-secondary)"></i>
+      <p>Nenhuma notificação</p>
+    </div>
+  } @else {
+    @for (n of notifications(); track n.id) {
+      <div class="notif-item" [class.unread]="!n.isRead" (click)="markRead(n)">
+        <a [routerLink]="['/profile', n.actor.username]">
+          <p-avatar
+            [image]="n.actor.avatarUrl || undefined"
+            [label]="!n.actor.avatarUrl ? n.actor.username[0].toUpperCase() : undefined"
+            shape="circle"
+          />
+        </a>
+        <div class="notif-content">
+          <span class="notif-actor">{{ n.actor.username }}</span>
+          {{ notifLabel(n) }}
+          <div class="notif-time">{{ n.createdAt | date:'short' }}</div>
+        </div>
+        @if (!n.isRead) {
+          <span class="unread-dot"></span>
+        }
+      </div>
+    }
+  }
+</div>

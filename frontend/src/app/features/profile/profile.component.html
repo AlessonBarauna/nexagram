@@ -1,0 +1,123 @@
+<div class="profile-page">
+  @if (loading()) {
+    <div class="profile-header skeleton-header">
+      <p-skeleton shape="circle" size="5rem" />
+      <div class="profile-meta">
+        <p-skeleton width="10rem" height="1.5rem" />
+        <p-skeleton width="20rem" height="1rem" styleClass="mt-2" />
+        <p-skeleton width="15rem" height="1rem" />
+      </div>
+    </div>
+  }
+
+  @if (!loading() && profile()) {
+    <div class="profile-header">
+      <div class="profile-avatar-wrap">
+        <p-avatar
+          [image]="profile()!.avatarUrl || undefined"
+          [label]="!profile()!.avatarUrl ? profile()!.username[0].toUpperCase() : undefined"
+          shape="circle"
+          size="xlarge"
+        />
+      </div>
+      <div class="profile-meta">
+        <div class="profile-top">
+          <h2 class="profile-username">{{ profile()!.username }}</h2>
+          @if (isOwner) {
+            <p-button label="Editar perfil" [outlined]="true" size="small" (onClick)="openEditDialog()" />
+          } @else {
+            <p-button
+              [label]="isFollowing() ? 'Seguindo' : 'Seguir'"
+              [outlined]="isFollowing()"
+              size="small"
+              [loading]="followLoading()"
+              (onClick)="toggleFollow()"
+            />
+          }
+        </div>
+        <div class="profile-stats">
+          <span><strong>{{ profile()!.postCount }}</strong> posts</span>
+          <span><strong>{{ profile()!.followerCount }}</strong> seguidores</span>
+          <span><strong>{{ profile()!.followingCount }}</strong> seguindo</span>
+        </div>
+        @if (profile()!.displayName) {
+          <p class="profile-display-name">{{ profile()!.displayName }}</p>
+        }
+        @if (profile()!.bio) {
+          <p class="profile-bio">{{ profile()!.bio }}</p>
+        }
+        @if (profile()!.website) {
+          <a [href]="profile()!.website" target="_blank" class="profile-website">
+            <i class="pi pi-link" style="font-size:0.75rem"></i>
+            {{ profile()!.website }}
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'posts'" (click)="activeTab.set('posts')">
+        <i class="pi pi-th-large"></i> Posts
+      </button>
+      @if (isOwner) {
+        <button class="tab-btn" [class.active]="activeTab() === 'saved'" (click)="activeTab.set('saved')">
+          <i class="pi pi-bookmark"></i> Salvos
+        </button>
+      }
+    </div>
+
+    <!-- Posts grid -->
+    <div class="posts-grid">
+      @for (post of posts(); track post.id) {
+        @if (post.media && post.media.length > 0) {
+          <div class="grid-item" [routerLink]="['/post', post.id]">
+            <img [src]="post.media[0].url" [alt]="post.caption || 'post'" loading="lazy" />
+            @if (post.media.length > 1) {
+              <div class="grid-multi"><i class="pi pi-copy"></i></div>
+            }
+            <div class="grid-overlay">
+              <span><i class="pi pi-heart-fill"></i> {{ post.likeCount }}</span>
+              <span><i class="pi pi-comment"></i> {{ post.commentCount }}</span>
+            </div>
+          </div>
+        }
+      }
+      @if (posts().length === 0 && !loading()) {
+        <div class="no-posts">
+          <div class="no-posts-icon"><i class="pi pi-camera"></i></div>
+          <p class="no-posts-title">Nenhum post ainda</p>
+          <p class="no-posts-sub">Quando publicar, vai aparecer aqui.</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Edit dialog -->
+<p-dialog
+  [visible]="editDialogVisible()"
+  (visibleChange)="editDialogVisible.set($event)"
+  header="Editar perfil"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+>
+  <div class="edit-form">
+    <div class="field">
+      <label>Nome</label>
+      <input pInputText [(ngModel)]="editDisplayName" placeholder="Seu nome" class="w-full" />
+    </div>
+    <div class="field">
+      <label>Bio</label>
+      <textarea pInputTextarea [(ngModel)]="editBio" rows="3" placeholder="Sobre você" class="w-full"></textarea>
+    </div>
+    <div class="field">
+      <label>Website</label>
+      <input pInputText [(ngModel)]="editWebsite" placeholder="https://..." class="w-full" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" [text]="true" (onClick)="editDialogVisible.set(false)" />
+    <p-button label="Salvar" [loading]="editSaving()" (onClick)="saveProfile()" />
+  </ng-template>
+</p-dialog>

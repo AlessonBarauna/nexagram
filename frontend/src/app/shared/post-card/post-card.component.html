@@ -1,0 +1,142 @@
+<p-confirmDialog />
+
+<article class="post-card">
+  <!-- Header -->
+  <header class="post-header">
+    <a [routerLink]="['/profile', post.author.username]" class="post-author">
+      <div class="author-avatar">
+        <p-avatar
+          [image]="post.author.avatarUrl || undefined"
+          [label]="!post.author.avatarUrl ? post.author.username[0].toUpperCase() : undefined"
+          shape="circle"
+          size="normal"
+        />
+      </div>
+      <div class="author-info">
+        <span class="author-name">{{ post.author.displayName || post.author.username }}</span>
+        <span class="author-meta">
+          <span class="author-handle">&#64;{{ post.author.username }}</span>
+          <span class="meta-dot">·</span>
+          <span class="post-time">{{ post.createdAt | timeAgo }}</span>
+        </span>
+      </div>
+    </a>
+    <p-menu #menu [model]="menuItems" [popup]="true" />
+    <button class="menu-btn" (click)="menu.toggle($event)">
+      <i class="pi pi-ellipsis-h"></i>
+    </button>
+  </header>
+
+  <!-- Media -->
+  @if (post.media && post.media.length > 0) {
+    <div class="post-media">
+      @if (isImage(post.media[mediaIndex()].mimeType)) {
+        <img [src]="post.media[mediaIndex()].url" class="media-img" [alt]="post.caption || 'post'" />
+      } @else {
+        <video [src]="post.media[mediaIndex()].url" class="media-img" controls></video>
+      }
+      @if (post.media.length > 1) {
+        <div class="media-nav">
+          <button class="nav-arrow" [disabled]="mediaIndex() === 0" (click)="prevMedia()">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          <span class="media-dots">
+            @for (m of post.media; track $index) {
+              <span class="dot" [class.active]="$index === mediaIndex()"></span>
+            }
+          </span>
+          <button class="nav-arrow" [disabled]="mediaIndex() === post.media.length - 1" (click)="nextMedia()">
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
+        <div class="media-count">{{ mediaIndex() + 1 }}/{{ post.media.length }}</div>
+      }
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="post-actions">
+    <div class="actions-left">
+      <button
+        class="action-btn"
+        [class.liked]="liked()"
+        (click)="toggleLike()"
+        [pTooltip]="liked() ? 'Descurtir' : 'Curtir'"
+        tooltipPosition="top"
+      >
+        <i [class]="liked() ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
+        @if (likesCount() > 0) {
+          <span class="action-count">{{ likesCount() }}</span>
+        }
+      </button>
+
+      <button class="action-btn" (click)="toggleComments()" pTooltip="Comentar" tooltipPosition="top">
+        <i class="pi pi-comment"></i>
+        @if (post.commentCount > 0) {
+          <span class="action-count">{{ post.commentCount }}</span>
+        }
+      </button>
+    </div>
+
+    <button
+      class="action-btn"
+      [class.saved]="saved()"
+      (click)="toggleSave()"
+      [pTooltip]="saved() ? 'Remover dos salvos' : 'Salvar'"
+      tooltipPosition="top"
+    >
+      <i [class]="saved() ? 'pi pi-bookmark-fill' : 'pi pi-bookmark'"></i>
+    </button>
+  </div>
+
+  <!-- Caption -->
+  @if (post.caption) {
+    <div class="post-caption">
+      <span class="caption-author">{{ post.author.username }}</span>
+      <span [innerHTML]="formatCaption(post.caption)"></span>
+    </div>
+  }
+
+  <!-- AI Tags -->
+  @if (post.aiTags && post.aiTags.length > 0) {
+    <div class="ai-tags">
+      @for (tag of post.aiTags.slice(0, 4); track tag) {
+        <span class="ai-tag">{{ tag }}</span>
+      }
+    </div>
+  }
+
+  <!-- Comments toggle -->
+  @if (post.commentCount > 0) {
+    <button class="view-comments-btn" (click)="toggleComments()">
+      {{ showComments() ? 'Ocultar' : 'Ver todos os ' + post.commentCount }} comentários
+    </button>
+  }
+
+  <!-- Comments list -->
+  @if (showComments()) {
+    <div class="comments-section">
+      @for (comment of comments(); track comment.id) {
+        <div class="comment">
+          <a [routerLink]="['/profile', comment.author.username]" class="comment-author">
+            {{ comment.author.username }}
+          </a>
+          <span class="comment-text">{{ comment.content }}</span>
+          <span class="comment-time">{{ comment.createdAt | timeAgo }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Add comment -->
+  <div class="comment-input">
+    <input
+      pInputText
+      type="text"
+      placeholder="Adicionar comentário..."
+      [(ngModel)]="commentText"
+      (keyup.enter)="submitComment()"
+      class="w-full"
+    />
+  </div>
+</article>

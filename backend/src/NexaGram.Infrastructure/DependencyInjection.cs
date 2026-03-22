@@ -49,6 +49,21 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
+        // Prevent Identity cookie auth from redirecting API requests
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Events.OnRedirectToLogin = ctx =>
+            {
+                ctx.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            };
+            options.Events.OnRedirectToAccessDenied = ctx =>
+            {
+                ctx.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            };
+        });
+
         services.AddScoped<DbSeeder>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
@@ -61,8 +76,16 @@ public static class DependencyInjection
         services.AddScoped<ICollectionService, CollectionService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDirectMessageService, DirectMessageService>();
-        services.AddSingleton<MinioStorageService>();
-        services.AddSingleton<IStorageService>(sp => sp.GetRequiredService<MinioStorageService>());
+        var storageProvider = configuration["Storage:Provider"] ?? "minio";
+        if (storageProvider.Equals("local", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSingleton<IStorageService, LocalStorageService>();
+        }
+        else
+        {
+            services.AddSingleton<MinioStorageService>();
+            services.AddSingleton<IStorageService>(sp => sp.GetRequiredService<MinioStorageService>());
+        }
 
         // JWT Authentication
         var jwtConfig = configuration.GetSection("Jwt");

@@ -1,0 +1,111 @@
+.notif-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.mark-all-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover { opacity: 0.7; }
+}
+
+.notif-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: 12px;
+  margin-bottom: 0.25rem;
+  background: rgba(255,255,255,0.02);
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-bottom: 0.25rem;
+
+  &:hover {
+    background: rgba(255,255,255,0.04);
+    transform: translateX(2px);
+  }
+
+  &.unread {
+    background: rgba(147,51,234,0.06);
+    border: 1px solid rgba(147,51,234,0.12);
+  }
+}
+
+.notif-content {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.notif-actor {
+  font-weight: 700;
+  color: var(--text);
+  margin-right: 0.3rem;
+}
+
+.notif-time {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin-top: 0.25rem;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9333ea, #ec4899);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(147,51,234,0.5);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-faint);
+  i { opacity: 0.3; }
+  p { margin: 0; font-size: 0.9rem; }
+}

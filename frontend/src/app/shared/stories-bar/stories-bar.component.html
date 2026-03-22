@@ -1,0 +1,49 @@
+<div class="stories-bar">
+  @for (group of stories; track group.user.id) {
+    <div
+      class="story-avatar"
+      [class.unseen]="group.hasUnviewed"
+      (click)="openStories(group)"
+    >
+      <div class="story-ring">
+        <p-avatar
+          [image]="group.user.avatarUrl || undefined"
+          [label]="!group.user.avatarUrl ? group.user.username[0].toUpperCase() : undefined"
+          shape="circle"
+          size="large"
+        />
+      </div>
+      <span class="story-username">{{ group.user.username }}</span>
+    </div>
+  }
+  @if (stories.length === 0) {
+    <p class="no-stories">Nenhuma story por enquanto</p>
+  }
+</div>
+
+<!-- Story viewer dialog -->
+<p-dialog
+  [visible]="!!viewingStory()"
+  [modal]="true"
+  [closable]="true"
+  (onHide)="closeStory()"
+  styleClass="story-dialog"
+  [showHeader]="false"
+>
+  @if (viewingStory(); as s) {
+    <div class="story-viewer" (click)="next()">
+      <div class="story-user-header">
+        <span class="story-viewer-name">{{ s.username }}</span>
+        <button class="story-close" (click)="$event.stopPropagation(); closeStory()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      @if (s.type === 'image') {
+        <img [src]="s.url" class="story-media" alt="story" />
+      } @else {
+        <video [src]="s.url" class="story-media" autoplay muted></video>
+      }
+      <div class="story-tap-hint">Toque para avançar</div>
+    </div>
+  }
+</p-dialog>

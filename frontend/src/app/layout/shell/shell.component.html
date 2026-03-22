@@ -1,0 +1,85 @@
+<p-toast />
+<app-post-create (created)="onPostCreated($event)" />
+
+<div class="shell-layout" [class.collapsed]="collapsed()">
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo" (click)="toggleSidebar()">
+      <div class="logo-icon">
+        <i class="pi pi-camera"></i>
+      </div>
+      @if (!collapsed()) {
+        <span class="logo-text">NexaGram</span>
+      }
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item"
+          [pTooltip]="collapsed() ? item.label : ''"
+          tooltipPosition="right"
+        >
+          <i [class]="item.icon"></i>
+          @if (!collapsed()) {
+            <span>{{ item.label }}</span>
+          }
+          @if (item.route === '/notifications' && unreadCount() > 0) {
+            <span class="notif-dot" [class.collapsed]="collapsed()"></span>
+          }
+        </a>
+      }
+
+      <!-- Create Post -->
+      <button
+        class="nav-item create-btn"
+        (click)="openCreate()"
+        [pTooltip]="collapsed() ? 'Criar post' : ''"
+        tooltipPosition="right"
+      >
+        <div class="create-icon">
+          <i class="pi pi-plus"></i>
+        </div>
+        @if (!collapsed()) {
+          <span>Criar post</span>
+        }
+      </button>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="nav-item user-item" (click)="goToProfile()">
+        <div class="user-avatar-wrap">
+          <p-avatar
+            [image]="user()?.avatarUrl || undefined"
+            [label]="!user()?.avatarUrl ? (user()?.username?.[0]?.toUpperCase() || 'U') : undefined"
+            shape="circle"
+            size="normal"
+          />
+        </div>
+        @if (!collapsed()) {
+          <div class="user-info">
+            <span class="user-name">{{ user()?.displayName || user()?.username }}</span>
+            <span class="user-handle">&#64;{{ user()?.username }}</span>
+          </div>
+        }
+      </div>
+      <a
+        class="nav-item logout-item"
+        (click)="logout()"
+        [pTooltip]="collapsed() ? 'Sair' : ''"
+        tooltipPosition="right"
+      >
+        <i class="pi pi-sign-out"></i>
+        @if (!collapsed()) { <span>Sair</span> }
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>
